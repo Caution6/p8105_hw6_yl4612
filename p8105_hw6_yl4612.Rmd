@@ -216,7 +216,10 @@ crossv_mc(bw_df, 100) %>%
     names_prefix = "rmse_"
   ) %>% 
   ggplot(aes(x = model, y = rmse)) +
-  geom_violin()
+  geom_violin() +
+  labs(
+    title = "rmse against model"
+  )
 ```
 
 ## Problem 3
@@ -235,5 +238,56 @@ weather_df =
     tmin = tmin / 10,
     tmax = tmax / 10) %>%
   select(name, id, everything())
+```
+
+Produce estimates of these two quantities
+
+```{r estimate}
+est = 
+  weather_df %>% 
+  bootstrap(5000, id = "strap_number") %>% 
+  mutate(
+    models = map(strap, ~lm(tmax ~ tmin, data = .x)),
+    tidy = map(models, broom::tidy),
+    glance = map(models, broom::glance)
+    ) %>% 
+  select(strap_number, tidy, glance) %>% 
+  unnest(tidy, glance) %>% 
+  select(strap_number, term, estimate, r.squared)
+```
+
+Plot the distribution of your estimates
+
+Two plots seem to show normal distribution. However, they are a little bit skewed in the left.
+
+```{r plot}
+est %>%
+  ggplot(aes(x = r.squared)) +
+  geom_density() +
+  labs(
+    title = "distribution of r.squared"
+  )
+
+est %>%
+  pivot_wider(
+    names_from = "term",
+    values_from = "estimate"
+  ) %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    log = log(intercept*tmin)
+  ) %>%
+  ggplot(aes(x = log)) +
+  geom_density() +
+  labs(
+    x = "log(beta0*beta1)",
+    title = "distribution of log(beta0*beta1)"
+  )
+```
+
+Provide a 95% confidence interval for r.squared and log(beta0*beta1)
+
+```{r}
+
 ```
 

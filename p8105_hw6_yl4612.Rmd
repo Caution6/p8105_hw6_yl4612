@@ -106,6 +106,50 @@ models_results_df %>%
 
 ## Problem 2
 
+Load and clean the data for regression analysis
+
+```{r load+clean}
+bw_df = 
+  read_csv("./data/birthweight.csv") %>% 
+  janitor::clean_names() %>% 
+  drop_na() %>% 
+  mutate(
+    babysex = case_when(
+      babysex == 1 ~ "male",
+      babysex == 2 ~ "female"
+    ),
+    frace = case_when(
+      frace == 1 ~ "white",
+      frace == 2 ~ "black",
+      frace == 3 ~ "asian",
+      frace == 4 ~ "puerto rican",
+      frace == 8 ~ "other",
+      frace == 9 ~ "unknown"
+    ),
+    malform = case_when(
+      malform == 0 ~ "absent",
+      malform == 1 ~ "present"
+    ),
+    mrace = case_when(
+      mrace == 1 ~ "white",
+      mrace == 2 ~ "black",
+      mrace == 3 ~ "asian",
+      mrace == 4 ~ "puerto Rican",
+      mrace == 8 ~ "other"
+    ),
+    babysex = factor(babysex),
+    frace = factor(frace),
+    malform = factor(malform),
+    mrace = factor(mrace)
+    )
+```
+
+Propose a regression model for birthweight
+
+```{r}
+
+```
+
 
 
 ## Problem 3

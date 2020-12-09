@@ -253,7 +253,15 @@ est =
     ) %>% 
   select(strap_number, tidy, glance) %>% 
   unnest(tidy, glance) %>% 
-  select(strap_number, term, estimate, r.squared)
+  select(strap_number, term, estimate, r.squared) %>%
+  pivot_wider(
+    names_from = "term",
+    values_from = "estimate"
+  ) %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    log = log(intercept*tmin)
+  ) 
 ```
 
 Plot the distribution of your estimates
@@ -262,21 +270,13 @@ Two plots seem to show normal distribution. However, they are a little bit skewe
 
 ```{r plot}
 est %>%
-  ggplot(aes(x = r.squared)) +
+  ggplot(aes(x = r_squared)) +
   geom_density() +
   labs(
     title = "distribution of r.squared"
   )
 
 est %>%
-  pivot_wider(
-    names_from = "term",
-    values_from = "estimate"
-  ) %>% 
-  janitor::clean_names() %>% 
-  mutate(
-    log = log(intercept*tmin)
-  ) %>%
   ggplot(aes(x = log)) +
   geom_density() +
   labs(
@@ -287,7 +287,19 @@ est %>%
 
 Provide a 95% confidence interval for r.squared and log(beta0*beta1)
 
-```{r}
+```{r CI}
+est %>%
+  summarize(
+    r2_lower = quantile(r_squared, 0.025), 
+    r2_upper = quantile(r_squared, 0.975)
+    )
 
+est %>%
+  summarize(
+    log_lower = quantile(log, 0.025), 
+    log_upper = quantile(log, 0.975)
+    )
 ```
 
+The 95% confidence interval for r.squared is 0.894 to 0.927.
+The 95% confidence interval for log(beta0*beta1) is 1.97 to 2.06.

@@ -161,6 +161,8 @@ broom::tidy(fit) %>%
 
 Show a plot of model residuals against fitted values
 
+Generally, points are evenly distributed above and below the x-axis. However, there are some outliers at top left corner. 
+
 ```{r residual+fitted}
 bw_df %>% 
   add_residuals(fit) %>%
@@ -176,10 +178,62 @@ bw_df %>%
 
 Compare your model to two others
 
-```{r}
+Violin plot shows that my model has the lowest RMSE.
 
+```{r compare}
+fit_lb_ga = lm(bwt ~ blength + gaweeks, data = bw_df)
+
+fit_hc_l_s = lm(bwt ~ bhead * blength * babysex, data = bw_df)
+
+broom::tidy(fit_lb_ga) %>% 
+  select(-std.error, -statistic) %>% 
+  knitr::kable(digits = 3)
+
+broom::tidy(fit_hc_l_s) %>% 
+  select(-std.error, -statistic) %>% 
+  knitr::kable(digits = 3)
+
+crossv_mc(bw_df, 100) %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  ) %>% 
+  mutate(
+    fit = map(.x = train, ~lm(bwt ~ babysex + bhead + blength + gaweeks + smoken + wtgain, data = .x)),
+    fit_lb_ga = map(.x = train, ~lm(bwt ~ blength + gaweeks, data = .x)),
+    fit_hc_l_s = map(.x = train, ~lm(bwt ~ bhead * blength * babysex, data = .x))
+  ) %>% 
+  mutate(
+    rmse_mine = map2_dbl(.x = fit, .y = test, ~rmse(model = .x, data = .y)),
+    rmse_lb_ga = map2_dbl(.x = fit_lb_ga, .y = test, ~rmse(model = .x, data = .y)),
+    rmse_hc_l_s = map2_dbl(.x = fit_hc_l_s, .y = test, ~rmse(model = .x, data = .y))
+  ) %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model",
+    values_to = "rmse",
+    names_prefix = "rmse_"
+  ) %>% 
+  ggplot(aes(x = model, y = rmse)) +
+  geom_violin()
 ```
 
-
-
 ## Problem 3
+
+Download data
+
+```{r download}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+

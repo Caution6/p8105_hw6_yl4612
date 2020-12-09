@@ -146,10 +146,23 @@ bw_df =
 
 Propose a regression model for birthweight
 
+My hypothesized structure includes `babysex`, `bhead`, `blength`, `gaweeks`, `smoken`, and `wtgain`. P-values of all factors mentioned before are lower than 0.05. Consequently, I keep all factors. 
+
+```{r}
+fit = lm(bwt ~ babysex + bhead + blength + gaweeks + smoken + wtgain, data = bw_df)
+
+broom::glance(fit)
+
+broom::tidy(fit) %>% 
+  select(-std.error, -statistic) %>% 
+  knitr::kable(digits = 3)
+```
+
+Show a plot of model residuals against fitted values
+
 ```{r}
 
 ```
-
 
 
 ## Problem 3

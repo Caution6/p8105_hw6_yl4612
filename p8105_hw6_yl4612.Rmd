@@ -29,6 +29,7 @@ set.seed(1)
 
 ```{r load libraries}
 library(modelr)
+library(mgcv)
 library(p8105.datasets)
 ```
 
@@ -148,7 +149,7 @@ Propose a regression model for birthweight
 
 My hypothesized structure includes `babysex`, `bhead`, `blength`, `gaweeks`, `smoken`, and `wtgain`. P-values of all factors mentioned before are lower than 0.05. Consequently, I keep all factors. 
 
-```{r}
+```{r propose}
 fit = lm(bwt ~ babysex + bhead + blength + gaweeks + smoken + wtgain, data = bw_df)
 
 broom::glance(fit)
@@ -160,9 +161,25 @@ broom::tidy(fit) %>%
 
 Show a plot of model residuals against fitted values
 
+```{r residual+fitted}
+bw_df %>% 
+  add_residuals(fit) %>%
+  add_predictions(fit) %>%
+  ggplot(aes(x = pred, y = resid)) +
+  geom_point(alpha = .2) +
+  labs(
+    x = "fitted values",
+    y = "model residuals",
+    title = "model residuals against fitted values"
+  )
+```
+
+Compare your model to two others
+
 ```{r}
 
 ```
+
 
 
 ## Problem 3

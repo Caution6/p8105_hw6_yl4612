@@ -106,23 +106,6 @@ models_results_df %>%
 
 ## Problem 2
 
-Find some residuals
 
-```{r}
-baby_df = 
-  read_csv("./data/birthweight.csv")
-```
 
-fit a model
-
-```{r}
-model_fit = lm(bwt ~ gaweeks, data = baby_df)
-```
-
-```{r}
-baby_df %>% 
-  modelr::add_residuals(model_fit) %>% 
-  ggplot(aes(x = gaweeks, y = resid)) + 
-  geom_point()
-```
-
+## Problem 3
